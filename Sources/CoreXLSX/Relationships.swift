@@ -24,6 +24,23 @@ public struct Relationships: Codable, Equatable {
   enum CodingKeys: String, CodingKey {
     case items = "relationship"
   }
+    public init(items: [Relationship]) {
+        self.items = items
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        struct Temp: Decodable {
+            let value: Relationship?
+            init(from decoder: any Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                self.value = try? container.decode(Relationship.self)
+            }
+        }
+        
+        self.items = try container.decode([Temp].self, forKey: .items).compactMap { $0.value }
+    }
 }
 
 /** Relationship to an entity stored in a given `.xlsx` archive. These can be worksheets,
